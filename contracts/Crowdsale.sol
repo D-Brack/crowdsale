@@ -18,10 +18,11 @@ contract Crowdsale {
         _;
     }
 
-    constructor(Token _token, uint256 _price) {
+    constructor(Token _token, uint256 _price, uint256 _totalSupply) {
         owner = msg.sender;
         token = _token;
         price = _price;
+        totalSupply = _totalSupply;
     }
 
     receive() external payable {

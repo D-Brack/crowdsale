@@ -5,6 +5,8 @@ import config from '../config.json'
 
 import Navigation from './Navigation'
 import Info from './Info'
+import Loading from './Loading'
+import Progress from './Progress'
 
 import TOKEN_ABI from '../abis/Token.json'
 import CROWDSALE_ABI from '../abis/Crowdsale.json'
@@ -12,10 +14,15 @@ import CROWDSALE_ABI from '../abis/Crowdsale.json'
 function App() {
   const [account, setAccount] = useState(null)
   const [provider, setProvider] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  const [token, setToken] = useState(null)
   const [crowdsale, setCrowdsale] = useState(null)
+
+  const [accountBalance, setAccountBalance] = useState(0)
+  const [price, setPrice] = useState(0)
+  const [tokensSold, setTokensSold] = useState(0)
+  const [totalSupply, setTotalSupply] = useState(0)
+
+  const [isLoading, setIsLoading] = useState(true)
 
   const loadBlockchainData = async () => {
 
@@ -31,7 +38,24 @@ function App() {
 
     //Fetch accounts
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts'})
-    setAccount(ethers.utils.getAddress(accounts[0]))
+    const account = ethers.utils.getAddress(accounts[0])
+    setAccount(account)
+
+    //Fetch account balance
+    const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
+    setAccountBalance(accountBalance)
+
+    //Fetch price
+    const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
+    setPrice(price)
+
+    //Fetch tokens sold
+    const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18)
+    setTokensSold(tokensSold)
+
+    //Fetch total supply
+    const totalSupply = ethers.utils.formatUnits(await crowdsale.totalSupply(), 18)
+    setTotalSupply(totalSupply)
     
     setIsLoading(false)
   }
@@ -45,8 +69,19 @@ function App() {
   return (
     <Container>
       <Navigation />
+      <h1 className="text-center">Introducing DApp Token!</h1>
+      {isLoading ? (
+        <p className='text-center'>Loading...</p>
+      ) : (
+        <div>
+          <Loading price={price} />
+          <Progress tokensSold={tokensSold} totalSupply={totalSupply} />
+        </div>
+      )}
+
       <hr />
-      {account && (<Info account={account} />)}
+
+      {account && (<Info account={account} accountBalance={accountBalance} />)}
     </Container>  
   )
 }
