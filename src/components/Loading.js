@@ -1,7 +1,10 @@
-
+import Spinner from 'react-bootstrap/Spinner'
 const Loading = ({ price }) => {
   return (
-    <p className="text-center"><strong>Price:</strong> {price}</p>
+    <div className='text-center my-5'>
+      <Spinner animation="border" variant="info" />
+      <p className='text-center'>Loading...</p>
+      </div>
   )
 }
 

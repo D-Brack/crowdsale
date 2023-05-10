@@ -7,6 +7,7 @@ import Navigation from './Navigation'
 import Info from './Info'
 import Loading from './Loading'
 import Progress from './Progress'
+import Buy from './Buy'
 
 import TOKEN_ABI from '../abis/Token.json'
 import CROWDSALE_ABI from '../abis/Crowdsale.json'
@@ -69,12 +70,13 @@ function App() {
   return (
     <Container>
       <Navigation />
-      <h1 className="text-center">Introducing DApp Token!</h1>
+      <h1 className="text-center my-4">Introducing DApp Token!</h1>
       {isLoading ? (
-        <p className='text-center'>Loading...</p>
+        <Loading />
       ) : (
         <div>
-          <Loading price={price} />
+          <p className="text-center"><strong>Price:</strong> {price}</p>
+          <Buy provider={provider} crowdsale={crowdsale} price={price} setIsLoading={setIsLoading} />
           <Progress tokensSold={tokensSold} totalSupply={totalSupply} />
         </div>
       )}

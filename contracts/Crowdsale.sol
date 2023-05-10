@@ -39,6 +39,10 @@ contract Crowdsale {
         emit TokensBought(msg.sender, _amount);
     }
 
+    function setPrice(uint256 _price) public onlyOwner {
+        price = _price;
+    }
+
     function finalizeSale() external onlyOwner {
         require(token.transfer(owner, token.balanceOf(address(this))));
         

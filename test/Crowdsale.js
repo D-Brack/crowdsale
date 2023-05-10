@@ -20,7 +20,7 @@ describe('Crowdsale', () => {
     token = await Token.deploy('DApp U', 'DAPP', 18, maxSupply)
     
     const Crowdsale = await ethers.getContractFactory('Crowdsale')
-    crowdsale = await Crowdsale.deploy(token.address, price)
+    crowdsale = await Crowdsale.deploy(token.address, price, token.totalSupply())
 
     const accounts = await ethers.getSigners()
     owner = accounts[0].address
@@ -42,6 +42,10 @@ describe('Crowdsale', () => {
 
     it('sets the price', async () => {
       expect(await crowdsale.price()).to.equal(price)
+    })
+
+    it('sets the total suply', async () => {
+      expect(await crowdsale.totalSupply()).to.equal(maxSupply)
     })
 
   })
@@ -105,6 +109,16 @@ describe('Crowdsale', () => {
       await expect(crowdsale.connect(user1).buyTokens(tokenAmount, { value: price })).to.emit(crowdsale, 'TokensBought').withArgs(user1.address, tokenAmount)
     })
 
+  })
+
+  describe('Setting Price', () => {
+    describe('Success', () => {
+      it('sets the correct price', async () => {
+        const newPrice = ether(.25)
+        await crowdsale.setPrice(newPrice)
+        expect(await crowdsale.price()).to.equal(newPrice)
+      })
+    })
   })
 
   describe('Finalize Sale', () => {
