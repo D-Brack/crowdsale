@@ -10,6 +10,10 @@ contract Crowdsale {
     uint256 public price;
     uint256 public tokensSold;
     uint256 public totalSupply;
+    uint256 public minBuy;
+    uint256 public maxBuy;
+
+    mapping(address => bool) public whitelist;
 
     event TokensBought(address indexed buyer, uint256 amount);
 
@@ -18,11 +22,15 @@ contract Crowdsale {
         _;
     }
 
-    constructor(Token _token, uint256 _price, uint256 _totalSupply) {
+    constructor(Token _token, uint256 _price, uint256 _totalSupply, uint256 _minBuy, uint256 _maxBuy) {
         owner = msg.sender;
         token = _token;
         price = _price;
         totalSupply = _totalSupply;
+        minBuy = _minBuy;
+        maxBuy = _maxBuy;
+
+        whitelist[owner] = true;
     }
 
     receive() external payable {
@@ -31,6 +39,8 @@ contract Crowdsale {
     }
 
     function buyTokens(uint256 _amount) public payable {
+        require(_amount >= minBuy, 'Minimum buy requirement not met');
+        require(_amount <= maxBuy, 'Maximum buy amount exceeded');
         require(msg.value == (_amount / 1e18) * price, 'Incorrect token or ETH amounts');
 
         require(token.transfer(msg.sender, _amount), 'Token transfer error');
@@ -48,6 +58,11 @@ contract Crowdsale {
         
         (bool sent, ) = owner.call{ value: address(this).balance }('');
         require(sent, 'ETH not received from contract');
+    }
+
+    function addToWhitelist(address _address) external onlyOwner {
+        require(_address != address(0));
+        whitelist[_address] = true;
     }
 
 }

@@ -6,22 +6,31 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
+const parseUnits = (n) => {
+  return hre.ethers.utils.parseUnits(n.toString(), 'ether')
+}
+
 async function main() {
+
+  //Deploy token
   const Token = await hre.ethers.getContractFactory('Token')
   const token = await Token.deploy('DApp U', 'DAPP', 18, 1000000)
   await token.deployed()
 
+  //Deploy crowdsale
   const Crowdsale = await hre.ethers.getContractFactory('Crowdsale')
-  const crowdsale = await Crowdsale.deploy(token.address, hre.ethers.utils.parseUnits('0.025', 'ether'), token.totalSupply())
+  const crowdsale = await Crowdsale.deploy(token.address, parseUnits(.025), token.totalSupply(), parseUnits(100), parseUnits(100000))
   await crowdsale.deployed()
 
+  //Log deployment
   console.log(`Token deployed at: ${token.address}\n`)
   console.log(`Crowdsale deployed at: ${crowdsale.address}\n`)
 
+  //Transfer tokens to crowdsale
   const transaction = await token.transfer(crowdsale.address, token.totalSupply())
   await transaction.wait()
-
   console.log("Tokens transfered to crowdsale contract")
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere

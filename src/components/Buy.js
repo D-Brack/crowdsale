@@ -6,13 +6,24 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Spinner from 'react-bootstrap/Spinner'
 
-const Buy = ({ provider, crowdsale, price, setIsLoading }) => {
+const Buy = ({ provider, crowdsale, price, setIsLoading, isWhitelisted, minBuy, maxBuy }) => {
 
   const [amount, setAmount] = useState(0)
   const [isWaiting, setIsWaiting] = useState(false)
 
   const buyHandler = async (e) => {
     e.preventDefault()
+
+    if(amount < minBuy) {
+      window.alert(`Minimum buy amount (${minBuy} tokens) not met`)
+      return
+    }
+    
+    if(amount > maxBuy) {
+      window.alert(`Maximum buy amount (${maxBuy} tokens) exceeded`)
+      return
+    }
+    
     setIsWaiting(true)
 
     try {
@@ -31,16 +42,28 @@ const Buy = ({ provider, crowdsale, price, setIsLoading }) => {
   }
 
   return (
-    <Form onSubmit={buyHandler} style={{ maxWidth: '800px', margin: '50px auto' }}>
+    <Form onSubmit={buyHandler} style={{ maxWidth: '800px', margin: '50px auto' }} >
       <Form.Group as={Row}>
         <Col>
-          <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} />
+          <div> 
+              {isWhitelisted ? (
+                <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} />
+              ) : (
+                <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} disabled />
+              )}
+          </div>
         </Col>
         <Col className='text-center'>
           {isWaiting ? (            
             <Spinner animation="border" variant="info" />
           ) : (
-            <Button type="submit" variant="primary" style={{ width: '100%' }}>Buy Tokens</Button>
+            <div>  
+              {isWhitelisted ? (
+                <Button type="submit" variant="primary" style={{ width: '100%' }} >Buy Tokens</Button>
+              ) : (
+                <Button type="submit" variant="secondary" style={{ width: '100%' }} disabled >NOT WHITELISTED</Button>
+              )}
+            </div>
           )}
         </Col>
       </Form.Group>

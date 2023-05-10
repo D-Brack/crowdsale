@@ -8,19 +8,21 @@ const tokens = (n) => {
 const ether = tokens
 
 describe('Crowdsale', () => {
-  let token, crowdsale, owner, user1, user2, price, ethAmount, maxSupply, tokenAmount
+  let token, crowdsale, owner, user1, user2, price, ethAmount, maxSupply, tokenAmount, minBuy, maxBuy
 
   beforeEach(async () => {
     price = ether(.5)
     ethAmount = price
     maxSupply = 1000000
     tokenAmount = tokens(1)
+    minBuy = tokens(.5)
+    maxBuy = tokens(5)
 
     const Token = await ethers.getContractFactory('Token')
     token = await Token.deploy('DApp U', 'DAPP', 18, maxSupply)
     
     const Crowdsale = await ethers.getContractFactory('Crowdsale')
-    crowdsale = await Crowdsale.deploy(token.address, price, token.totalSupply())
+    crowdsale = await Crowdsale.deploy(token.address, price, token.totalSupply(), minBuy, maxBuy)
 
     const accounts = await ethers.getSigners()
     owner = accounts[0].address
@@ -46,6 +48,18 @@ describe('Crowdsale', () => {
 
     it('sets the total suply', async () => {
       expect(await crowdsale.totalSupply()).to.equal(maxSupply)
+    })
+
+    it('sets the minimum buy amount', async () => {
+      expect(await crowdsale.minBuy()).to.equal(minBuy)
+    })
+
+    it('sets the maximum buy amount', async () => {
+      expect(await crowdsale.maxBuy()).to.equal(maxBuy)
+    })
+
+    it('adds owner to whitelist', async () => {
+      expect(await crowdsale.whitelist(owner)).to.equal(true)
     })
 
   })
@@ -82,6 +96,14 @@ describe('Crowdsale', () => {
         await expect(crowdsale.connect(user1).buyTokens(tokenAmount.mul(2), { value: price })).to.be.reverted
       })
 
+      it('rejects minimum buy restrictions', async () => {
+        await expect(crowdsale.buyTokens(tokenAmount.div(10), { value: price.div(10) })).to.be.reverted
+      })
+
+      it('rejects maximum buy limitations', async () => {
+        await expect(crowdsale.buyTokens(tokenAmount.mul(10), { value: price.mul(10) })).to.be.reverted
+      })
+
     })
 
   })  
@@ -112,13 +134,25 @@ describe('Crowdsale', () => {
   })
 
   describe('Setting Price', () => {
+
     describe('Success', () => {
+
       it('sets the correct price', async () => {
         const newPrice = ether(.25)
         await crowdsale.setPrice(newPrice)
         expect(await crowdsale.price()).to.equal(newPrice)
       })
+
     })
+
+    describe('Failure', () => {
+
+      it('rejects calls not from owner', async () => {
+        await expect(crowdsale.connect(user1).setPrice(ether(.25))).to.be.reverted
+      })
+
+    })
+
   })
 
   describe('Finalize Sale', () => {
@@ -143,6 +177,29 @@ describe('Crowdsale', () => {
     describe('Failure', () => {
       it('rejects calls not from owner', async () => {
         await expect(crowdsale.connect(user1).finalizeSale()).to.be.reverted
+      })
+
+    })
+
+  })
+
+  describe('Adding to Whitelist', () => {
+
+    describe('Success', () => {
+      it('adds new address to whitelist', async () => {
+        await crowdsale.addToWhitelist(user1.address)
+        expect(await crowdsale.whitelist(user1.address)).to.equal(true)
+      })
+    })
+
+    describe('Failure', () => {
+
+      it('rejects calls not from owner', async () => {
+        await expect(crowdsale.connect(user1).finalizeSale()).to.be.reverted
+      })
+
+      it('rejects invalid whitelist addresses', async () => {
+        await expect(crowdsale.addToWhitelist('0x0000000000000000000000000000000000000000')).to.be.reverted
       })
 
     })
