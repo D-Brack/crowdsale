@@ -12,6 +12,7 @@ contract Crowdsale {
     uint256 public totalSupply;
     uint256 public minBuy;
     uint256 public maxBuy;
+    uint256 public startTime;
 
     mapping(address => bool) public whitelist;
 
@@ -22,13 +23,14 @@ contract Crowdsale {
         _;
     }
 
-    constructor(Token _token, uint256 _price, uint256 _totalSupply, uint256 _minBuy, uint256 _maxBuy) {
+    constructor(Token _token, uint256 _price, uint256 _totalSupply, uint256 _minBuy, uint256 _maxBuy, uint256 _startTime) {
         owner = msg.sender;
         token = _token;
         price = _price;
         totalSupply = _totalSupply;
         minBuy = _minBuy;
         maxBuy = _maxBuy;
+        startTime = _startTime;
 
         whitelist[owner] = true;
     }
@@ -41,6 +43,7 @@ contract Crowdsale {
     function buyTokens(uint256 _amount) public payable {
         require(_amount >= minBuy, 'Minimum buy requirement not met');
         require(_amount <= maxBuy, 'Maximum buy amount exceeded');
+        require(block.timestamp >= startTime, 'Sale has not started yet');
         require(msg.value == (_amount / 1e18) * price, 'Incorrect token or ETH amounts');
 
         require(token.transfer(msg.sender, _amount), 'Token transfer error');

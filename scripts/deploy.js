@@ -19,7 +19,7 @@ async function main() {
 
   //Deploy crowdsale
   const Crowdsale = await hre.ethers.getContractFactory('Crowdsale')
-  const crowdsale = await Crowdsale.deploy(token.address, parseUnits(.025), token.totalSupply(), parseUnits(100), parseUnits(100000))
+  const crowdsale = await Crowdsale.deploy(token.address, parseUnits(.025), token.totalSupply(), parseUnits(100), parseUnits(100000), 1683961827)
   await crowdsale.deployed()
 
   //Log deployment

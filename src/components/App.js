@@ -31,6 +31,7 @@ function App() {
   const [totalSupply, setTotalSupply] = useState(0)
   const [minBuy, setMinBuy] = useState(0)
   const [maxBuy, setMaxBuy] = useState(0)
+  const [startTime, setStartTime] = useState(0)
 
   const [isLoading, setIsLoading] = useState(true)
 
@@ -91,6 +92,10 @@ function App() {
     //Fetch maximum buy amount
     const maxBuy = formatUnits(await crowdsale.maxBuy())
     setMaxBuy(maxBuy)
+
+    //Fetch start time
+    const startTime = await crowdsale.startTime()
+    setStartTime(startTime)
     
     setIsLoading(false)
   }
@@ -118,6 +123,7 @@ function App() {
             isWhitelisted={isWhitelisted}
             minBuy={minBuy}
             maxBuy={maxBuy}
+            startTime={startTime}
           />
           <Progress tokensSold={tokensSold} totalSupply={totalSupply} />
         </div>

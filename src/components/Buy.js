@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Spinner from 'react-bootstrap/Spinner'
 
-const Buy = ({ provider, crowdsale, price, setIsLoading, isWhitelisted, minBuy, maxBuy }) => {
+const Buy = ({ provider, crowdsale, price, setIsLoading, isWhitelisted, minBuy, maxBuy, startTime }) => {
 
   const [amount, setAmount] = useState(0)
   const [isWaiting, setIsWaiting] = useState(false)
@@ -43,30 +43,37 @@ const Buy = ({ provider, crowdsale, price, setIsLoading, isWhitelisted, minBuy, 
 
   return (
     <Form onSubmit={buyHandler} style={{ maxWidth: '800px', margin: '50px auto' }} >
-      <Form.Group as={Row}>
-        <Col>
-          <div> 
-              {isWhitelisted ? (
-                <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} />
+      <div>
+        {/* {Date.now() >= startTime ? ( */}
+        {Date.now() >= (startTime * 1000) ? (
+          <Form.Group as={Row}>
+            <Col>
+              <div> 
+                  {isWhitelisted ? (
+                    <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} />
+                  ) : (
+                    <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} disabled />
+                  )}
+              </div>
+            </Col>
+            <Col className='text-center'>
+              {isWaiting ? (            
+                <Spinner animation="border" variant="info" />
               ) : (
-                <Form.Control type="number" placeholder="Enter Amount" onChange={(e) => setAmount(e.target.value)} disabled />
+                <div>  
+                  {isWhitelisted ? (
+                    <Button type="submit" variant="primary" style={{ width: '100%' }} >Buy Tokens</Button>
+                  ) : (
+                    <Button type="submit" variant="secondary" style={{ width: '100%' }} disabled >NOT WHITELISTED</Button>
+                  )}
+                </div>
               )}
-          </div>
-        </Col>
-        <Col className='text-center'>
-          {isWaiting ? (            
-            <Spinner animation="border" variant="info" />
-          ) : (
-            <div>  
-              {isWhitelisted ? (
-                <Button type="submit" variant="primary" style={{ width: '100%' }} >Buy Tokens</Button>
-              ) : (
-                <Button type="submit" variant="secondary" style={{ width: '100%' }} disabled >NOT WHITELISTED</Button>
-              )}
-            </div>
-          )}
-        </Col>
-      </Form.Group>
+            </Col>
+          </Form.Group>
+        ) : (
+          <h3 className='text-center'>SALE IS NOT OPEN</h3>
+        )}
+      </div>    
     </Form>
   )
 }
